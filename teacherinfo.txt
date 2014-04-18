@@ -1,0 +1,14 @@
+1;Chidambara K;11cs351;4
+2;Chari;11cs352;4
+3;NSK;11cs353;4
+4;Krupesha;11cs353;4
+5;Phala;11cs354;4
+6;Dinky;11cs365;4
+7;NSK;11cs365;4
+8;BNR;11cs365;4
+9;Nagegowda;11cs251;5
+10;VinayJoshi;11cs353;4
+11;HBM;11cs254;4
+12;DineshSingh;11cs252;4
+13;Chandrasekhar;11cs253;4
+14;Prafullata;11cs255;4
