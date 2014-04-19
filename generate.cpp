@@ -43,6 +43,23 @@ void alloc(struct field *x[6])
 	}
 }
 
+void display_timetable()
+{
+	struct field **b[]={a1,a2,a3,b1,b2,b3,c1,c2,c3};
+	for(int k=0;k<9;k++)
+	{
+		for(int i=0;i<5;i++)
+		{
+			for(int j=0;j<6;j++)
+			{
+				cout<<i<<":"<<j<<" "<<b[k][i][j].cid<<"\t";
+			}
+			cout<<"\n";
+		}
+		cout<<"\n";
+	}
+}
+
 //This method calls the allocation method which allocates space to hold the
 //teacher,course pairs which are later used to render the entire timetable.
 //There is one array for each of the sections in the 3 years for which the timetables
@@ -108,13 +125,44 @@ Course* getLabs(int sem)
 	return ptr;
 }
 
+Course& getCoursebyid(string courseid)
+{
+	Course temp;
+	//cout<<"in method getcourse\n";
+	for(int i=0;i<Course::getCount();++i)
+	{
+		
+		if(carr[i].getCourseId() == courseid)
+		{
+			//cout<<courseid<<":"<<carr[i].getCourseId()<<"\n";
+			return carr[i];
+		}
+	}
+
+}
+
+
 bool course_done_for_day(struct field *x,Course *c)
 {
+	bool islab = c->isLab();
+	bool isfixed = c->isfixed();
 	for(int i=0;i<6;++i)
 	{
-		if(x[i].cid==(*c).getCourseId())
+		if(x[i].cid=="\0")
 		{
-			return true;
+			return false;
+		}
+		else
+		{
+			Course &temp = getCoursebyid(x[i].cid);
+			bool flag_lab = islab && temp.isLab();
+			bool flag_fixed = isfixed && temp.isfixed(); 
+			//if(x[i].cid==(*c).getCourseId() || (islab && (getCoursebyid(x[i].cid)).isLab()))
+			if(x[i].cid==c->getCourseId() || flag_lab || flag_fixed)
+			{
+				//cout<<c->getCourseId()<<"\n";
+				return true;
+			}
 		}
 	}
 	return false;
@@ -126,18 +174,32 @@ void find_free(struct field *x[],Course *c)
 	int hr_inc=1;
 	for(i=0;i<5;i++)
 	{
+		
 		if(course_done_for_day(x[i],c))
+		{
+			//cout<<i<<"\n";
 			continue;
+		}
 		else
 		{
-			if(c->isLab())
+			if(c->isLab() || c->isfixed())
 				hr_inc=2;
 			for(j=0;j<6;j+=hr_inc)
 			{
 				if(!x[i][j].done)
+				{
 					x[i][j].cid=c->getCourseId();
+					x[i][j].done=1;
+					if(hr_inc==2)
+					{
+						x[i][j+1].cid=c->getCourseId();
+						x[i][j+1].done=1;
+					}
+					return;
+				}
 			}
 		}
+		//display_timetable();
 	}
 }
 
@@ -165,23 +227,29 @@ void course_alloc(struct field *x[],struct field *y[],struct field *z[],Course *
 	int i=0,rand,free;
 	srand(time(NULL));
 	rand=random()%3;
+	int prev_rand = rand;
 	while(i<3)//all 3 sections..randomize as to not give any section the first preference
 	{
 		if(rand==0)
 		{
 			find_free(x,c);
+			rand ++;
 		}
 		else if(rand==1)
 		{
 			find_free(y,c);
+			rand=(prev_rand==2?0:2);
+			prev_rand=1;
 		}
 		else
 		{
 			find_free(z,c);
+			rand = (prev_rand==1?0:1);
 		}
-		rand+=(rand%2);
+		
 		i++;
 	}
+	//display_timetable();
 }
 
 
@@ -191,37 +259,49 @@ void alloc_lab()
 	//allocate the lab hours from. This makes the preference selection
 	//process fair and unbiased to all sections and semesters.
 	int i,j,cur_sem=sem;
+	int lab_count=0;
 	Course *c;
+	
 	struct field **b[]={a1,a2,a3,b1,b2,b3,c1,c2,c3};
 	for(i=0;i<3;i++)//each sem
 	{
-		c=getLabs(sem);
-		cur_sem+=2;
+		c=getLabs(cur_sem);
+		lab_count = getLabCount(cur_sem);
+		cur_sem += 2;
 		//cout <<"done********************\n";
-		for(j=0;j<3;j++)//each lab for that sem
+		for(j=0;j<lab_count;j++)//each lab for that sem
 		{
-			c[j].display();
+		//	c[j].display();
 			course_alloc(b[i*3],b[i*3+1],b[i*3+2],(c+j));//get 3 sections at a time
 		}
 	}
 	
 }
 
-void alloc_fixed(Teacher* tchrs, Course *courses)
+void alloc_fixed()
 {
 	int cur_sem = sem;
-	Course *fixed_courses = findfixed(cur_sem);
-	int fixed_count = getFixedCount(cur_sem);
-	for(int i=0;i<fixed_count;++i)
+	struct field **b[]={a1,a2,a3,b1,b2,b3,c1,c2,c3};
+	for(int i = 0; i<3 ; ++i)
 	{
-		fixed_courses[i].display();
-	}		
+		Course *fixed_courses = findfixed(cur_sem);
+		int fixed_count = getFixedCount(cur_sem);
+		cur_sem += 2;
+		for(int j=0;j<fixed_count;++j)
+		{
+			course_alloc(b[i*3],b[i*3+1],b[i*3+2],(fixed_courses+j));
+		}
+	}
 }
+
+
 void process()
 {
 	//Now we obtain the arrays containing the course and teacher objects
 	tarr=teacherInit();
 	carr=courseInit();
-//	alloc_lab();
-	alloc_fixed(tarr,carr);
+	alloc_fixed();
+	alloc_lab();
+	display_timetable();
+	
 }
