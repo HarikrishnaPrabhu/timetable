@@ -108,6 +108,20 @@ int getFixedCount(int sem)
 	return count;
 }
 
+int getOtherCount(int sem)
+{
+	int count = 0;
+	for(int i=0;i<Course::getCount();i++)
+	{
+		if(carr[i].getSem() == sem && !carr[i].isfixed() && !carr[i].isLab())
+		{
+			//courses[i].display();
+			++count;
+		}
+	}
+	return count;
+}
+
 Course* getLabs(int sem)
 {
 	int cur = 0;
@@ -158,7 +172,7 @@ bool course_done_for_day(struct field *x,Course *c)
 			bool flag_lab = islab && temp.isLab();
 			bool flag_fixed = isfixed && temp.isfixed(); 
 			//if(x[i].cid==(*c).getCourseId() || (islab && (getCoursebyid(x[i].cid)).isLab()))
-			if(x[i].cid==c->getCourseId() || flag_lab || flag_fixed)
+			if(x[i].cid==c->getCourseId() || flag_lab)
 			{
 				//cout<<c->getCourseId()<<"\n";
 				return true;
@@ -168,7 +182,29 @@ bool course_done_for_day(struct field *x,Course *c)
 	return false;
 }
 
-void find_free(struct field *x[],Course *c)
+bool is_adjacent(struct field *x,int hour,Course *c)
+{
+	if(!c->isfixed() || hour==0)
+	{
+		return false;
+	}
+	else
+	{
+		if(x[hour-2].cid=="\0")
+		{
+			return false;
+		}
+		
+		Course &temp = getCoursebyid(x[hour-2].cid);
+		if(temp.isfixed())
+		{
+			return true;
+		}	
+		return false;
+	}
+}
+
+void find_free(struct field *x[],struct field *y[],struct field *z[],Course *c)
 {
 	int i,j;
 	int hr_inc=1;
@@ -188,12 +224,22 @@ void find_free(struct field *x[],Course *c)
 			{
 				if(!x[i][j].done)
 				{
-					x[i][j].cid=c->getCourseId();
-					x[i][j].done=1;
 					if(hr_inc==2)
 					{
+						x[i][j].cid=c->getCourseId();
+						x[i][j].done=1;
 						x[i][j+1].cid=c->getCourseId();
 						x[i][j+1].done=1;
+								
+					}
+					else if(!((y[i][j].cid==c->getCourseId())||(z[i][j].cid==c->getCourseId())))
+					{
+						x[i][j].cid=c->getCourseId();
+						x[i][j].done=1;
+					}
+					else
+					{
+						continue;
 					}
 					return;
 				}
@@ -222,32 +268,62 @@ Course* findfixed(int sem)
 	return fixed_courses;	
 }
 
+Course* findOther(int sem)
+{
+	int other_count = getOtherCount(sem);
+	int cur=0;
+	
+	//cout<<"Count:"<<count<<"\n";
+	Course *other_courses = new Course[other_count];
+	for(int i=0;i<Course::getCount() && cur<other_count ;i++)
+	{
+		if(carr[i].getSem() == sem && !carr[i].isfixed() && !carr[i].isLab())
+		{
+			other_courses[cur++] = carr[i];
+			
+		}
+	}
+	return other_courses;	
+}
+
 void course_alloc(struct field *x[],struct field *y[],struct field *z[],Course *c)
 {
-	int i=0,rand,free;
-	srand(time(NULL));
-	rand=random()%3;
-	int prev_rand = rand;
-	while(i<3)//all 3 sections..randomize as to not give any section the first preference
+	if(c->isdone())
 	{
-		if(rand==0)
+		return;
+	}
+	else
+	{
+		int i=0,rand,free;
+		srand(time(NULL));
+		rand=random()%3;
+		int prev_rand = rand;
+		while(i<3)//all 3 sections..randomize as to not give any section the first preference
 		{
-			find_free(x,c);
-			rand ++;
-		}
-		else if(rand==1)
-		{
-			find_free(y,c);
-			rand=(prev_rand==2?0:2);
-			prev_rand=1;
-		}
-		else
-		{
-			find_free(z,c);
-			rand = (prev_rand==1?0:1);
-		}
+			if(rand==0)
+			{
+				find_free(x,y,z,c);
+				rand ++;
+			}
+			else if(rand==1)
+			{
+				find_free(y,x,z,c);
+				rand=(prev_rand==2?0:2);
+				prev_rand=1;
+			}
+			else
+			{
+				find_free(z,x,y,c);
+				rand = (prev_rand==1?0:1);
+			}
 		
-		i++;
+			i++;
+		}
+		c->increment_alloc();
+		if(c->isLab() || c->isfixed())
+		{
+			c->increment_alloc();
+		}	
 	}
 	//display_timetable();
 }
@@ -278,6 +354,18 @@ void alloc_lab()
 	
 }
 
+bool is_to_alloc(Course * courses,int total)
+{
+	for(int i=0;i<total;++i)
+	{
+		if(!courses[i].isdone())
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
 void alloc_fixed()
 {
 	int cur_sem = sem;
@@ -287,13 +375,30 @@ void alloc_fixed()
 		Course *fixed_courses = findfixed(cur_sem);
 		int fixed_count = getFixedCount(cur_sem);
 		cur_sem += 2;
-		for(int j=0;j<fixed_count;++j)
+		while(is_to_alloc(fixed_courses,fixed_count))
 		{
+			int j=random()%fixed_count;
 			course_alloc(b[i*3],b[i*3+1],b[i*3+2],(fixed_courses+j));
 		}
 	}
 }
 
+void alloc_others()
+{
+	int cur_sem = sem;
+	struct field **b[]={a1,a2,a3,b1,b2,b3,c1,c2,c3};
+	for(int i = 0; i<3 ; ++i)
+	{
+		Course *other_courses = findOther(cur_sem);
+		int other_count = getOtherCount(cur_sem);
+		cur_sem += 2;
+		while(is_to_alloc(other_courses,other_count))
+		{
+			int j=random()%other_count;
+			course_alloc(b[i*3],b[i*3+1],b[i*3+2],(other_courses+j));
+		}
+	}
+}
 
 void process()
 {
@@ -302,6 +407,7 @@ void process()
 	carr=courseInit();
 	alloc_fixed();
 	alloc_lab();
+	alloc_others();
 	display_timetable();
 	
 }

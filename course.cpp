@@ -7,7 +7,7 @@ Course::Course()
 }
 
 Course::Course(CourseConst &con, string id, string name, int credits,int sem)
-:con_(con),courseid_(id), coursename_(name), credits_(credits),sem_(sem)
+:con_(con),courseid_(id), coursename_(name), credits_(credits),sem_(sem),hours_(0)
 {
 	++count;
 }
@@ -35,6 +35,17 @@ bool Course::isfixed() const
 {
 	return this->con_.isfixed();
 }
+
+bool Course::isdone() const
+{
+	return (this->hours_==this->credits_);
+}
+
+void Course::increment_alloc()
+{
+	++this->hours_;
+}
+
 void Course::display() const
 {
 	cout << "Course id: " << courseid_ << endl;
