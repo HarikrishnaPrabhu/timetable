@@ -134,7 +134,7 @@ Teacher *teacherInit()
 				}
 			}
 			Teacher t(con, id, x[1], subs, hrs);
-			t.display();
+			//t.display();
 			arr[idx++] = t;
 		}
 		myfile.close();

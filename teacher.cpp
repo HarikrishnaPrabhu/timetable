@@ -12,6 +12,15 @@ Teacher::Teacher(TeacherConst& con,int id, string name, vector<string> courseid,
 	++count;
 }
 
+Teacher Teacher::operator=(Teacher& rhs)
+{
+	this->con_=rhs.con_;
+	this->teacherid_ = rhs.teacherid_;
+	this->name_ = rhs.name_;
+	this->courseid_ = rhs.courseid_;
+	this->hrs_ = rhs.hrs_;
+	return (*this);
+}
 vector<string> Teacher::getCourseId() const
 {
 	return this->courseid_;
@@ -22,6 +31,16 @@ int Teacher::getCount()
 	return count;
 }
 
+string Teacher::getDaysAvail() const
+{
+	return (this->con_).getDaysAvail();
+}
+
+string Teacher::getHoursAvail() const
+{
+	return (this->con_).getHoursAvail();	
+}
+	
 template <typename ptr_t>
 void display_courses(ptr_t begin,ptr_t end)
 {

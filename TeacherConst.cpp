@@ -23,7 +23,9 @@ TeacherConst::TeacherConst(TeacherConst& rhs)
 	this->teacherid_=rhs.teacherid_;
 	this->days_avail_=rhs.days_avail_;
 	this->hrs_avail_=rhs.hrs_avail_;
+	this->continuous_ = rhs.continuous_;
 }
+
 void TeacherConst::display() const
 {
 	cout << "Teacher id: " << teacherid_ << endl;
@@ -35,5 +37,15 @@ void TeacherConst::display() const
 int TeacherConst::getTeacherId() const
 {
 	return this->teacherid_;
+}
+
+string TeacherConst::getDaysAvail() const
+{
+	return this->days_avail_;
+}
+
+string TeacherConst::getHoursAvail() const
+{
+	return this->hrs_avail_;	
 }
 

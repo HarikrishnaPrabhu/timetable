@@ -42,18 +42,36 @@ void alloc(struct field *x[6])
 		x[i]=new field[6];
 	}
 }
-void countTeachers(string courseid)
+int countTeachers(string courseid)
 {
 	int count=0;
 	for(int i=0;i<Teacher::getCount();++i)
 	{
-		
+		vector<string> courses = tarr[i].getCourseId();
+		if(find(courses.begin(),courses.end(),courseid)!=courses.end())
+		{
+			++count;
+		}
 	}
+	return count;
 }
 
-void getTeachers(string courseid)
+Teacher* getTeachers(string courseid)
 {
-
+	int count=countTeachers(courseid);
+	Teacher *tchrs=new Teacher[count];
+	int j=0;
+	for(int i=0;i<Teacher::getCount();++i)
+	{
+		vector<string> courses = tarr[i].getCourseId();
+		if(find(courses.begin(),courses.end(),courseid)!=courses.end())
+		{
+			
+			tchrs[j++]=tarr[i];
+			//tchrs[j].display();
+		}
+	}
+	return tchrs;
 }
 
 void display_timetable()
@@ -195,7 +213,48 @@ bool course_done_for_day(struct field *x,Course *c)
 	return false;
 }
 
+bool teacher_available(Course *c,int day,int hour)
+{
+	if(c->isLab())
+	{
+		return true;
+	}
+	string courseid = c->getCourseId();
+	Teacher *tchrs=getTeachers(courseid);
+	int tchr_count = countTeachers(courseid);
+//	cout<<"**************************************************************"<<"\n";
+//	cout<<courseid<<":"<<tchr_count<<"\n";
+	for(int i=0;i<tchr_count;++i)
+	{
+//		tchrs[i].display();
+		string days_avail = tchrs[i].getDaysAvail();
+		string hrs_avail = tchrs[i].getHoursAvail();
+//		cout<<days_avail<<":"<<hrs_avail<<":"<<day<<":"<<hour<<"\n";
+		if(!(days_avail[day]=='1' && hrs_avail[hour]=='1'))
+		{
+			return false;
+		}
+	}
+	return true;
+}
 
+bool is_lab_available(Course *c,struct field*y[],struct field *z[],int day,int hour)
+{
+	string cid1=y[day][hour].cid;
+	string cid2=z[day][hour].cid;
+	if(cid1=="\0" || cid2=="\0")
+	{
+		return true;
+	}
+	else if(getCoursebyid(cid1).isLab() && getCoursebyid(cid2).isLab())
+	{
+		return false;
+	}
+	else
+	{
+		return true;
+	}
+}
 
 void find_free(struct field *x[],struct field *y[],struct field *z[],Course *c)
 {
@@ -215,28 +274,33 @@ void find_free(struct field *x[],struct field *y[],struct field *z[],Course *c)
 				hr_inc=2;
 			for(j=0;j<6;j+=hr_inc)
 			{
+				cout<<i<<":"<<j<<"\n";
 				if(!x[i][j].done)
 				{
-					if(hr_inc==2)
+					if(teacher_available(c,i,j))
 					{
-						x[i][j].cid=c->getCourseId();
-						x[i][j].done=1;
-						x[i][j+1].cid=c->getCourseId();
-						x[i][j+1].done=1;
-								
+						if(hr_inc==2 && is_lab_available(c,y,z,i,j))
+						{
+							x[i][j].cid=c->getCourseId();
+							x[i][j].done=1;
+							x[i][j+1].cid=c->getCourseId();
+							x[i][j+1].done=1;
+							return;		
+						}
+						else if(hr_inc ==1 && !((y[i][j].cid==c->getCourseId())||(z[i][j].cid==c->getCourseId())))
+						{
+							x[i][j].cid=c->getCourseId();
+							x[i][j].done=1;
+							return;
+						}
+						else
+						{
+							continue;
+						}
+					
 					}
-					else if(!((y[i][j].cid==c->getCourseId())||(z[i][j].cid==c->getCourseId())))
-					{
-						x[i][j].cid=c->getCourseId();
-						x[i][j].done=1;
-					}
-					else
-					{
-						continue;
-					}
-					return;
 				}
-			}
+			}		
 		}
 		//display_timetable();
 	}
@@ -398,9 +462,16 @@ void process()
 	//Now we obtain the arrays containing the course and teacher objects
 	tarr=teacherInit();
 	carr=courseInit();
-/*	alloc_fixed();
+	alloc_fixed();
 	alloc_lab();
 	alloc_others();
 	display_timetable();
-*/	
+	
+	/*int count=countTeachers("11cs353");
+	Teacher *t =new Teacher[count];
+	t=getTeachers("11cs353");
+	for(int i=0;i<count;++i)
+	{
+		t[i].display();
+	}*/
 }
