@@ -42,6 +42,19 @@ void alloc(struct field *x[6])
 		x[i]=new field[6];
 	}
 }
+void countTeachers(string courseid)
+{
+	int count=0;
+	for(int i=0;i<Teacher::getCount();++i)
+	{
+		
+	}
+}
+
+void getTeachers(string courseid)
+{
+
+}
 
 void display_timetable()
 {
@@ -182,27 +195,7 @@ bool course_done_for_day(struct field *x,Course *c)
 	return false;
 }
 
-bool is_adjacent(struct field *x,int hour,Course *c)
-{
-	if(!c->isfixed() || hour==0)
-	{
-		return false;
-	}
-	else
-	{
-		if(x[hour-2].cid=="\0")
-		{
-			return false;
-		}
-		
-		Course &temp = getCoursebyid(x[hour-2].cid);
-		if(temp.isfixed())
-		{
-			return true;
-		}	
-		return false;
-	}
-}
+
 
 void find_free(struct field *x[],struct field *y[],struct field *z[],Course *c)
 {
@@ -405,9 +398,9 @@ void process()
 	//Now we obtain the arrays containing the course and teacher objects
 	tarr=teacherInit();
 	carr=courseInit();
-	alloc_fixed();
+/*	alloc_fixed();
 	alloc_lab();
 	alloc_others();
 	display_timetable();
-	
+*/	
 }

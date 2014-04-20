@@ -91,6 +91,7 @@ TeacherConst* TeacherConstInit()
 			string h_avail = x[2];
 			int conti= atoi(x[3].c_str());
 			TeacherConst t(id, d_avail , h_avail, conti);	//Course object!
+			//t.display();
 			arr[idx++] = t;
 		}
 		myfile.close();
@@ -115,13 +116,14 @@ Teacher *teacherInit()
 	if (myfile.is_open())
 	{
 		while ( getline (myfile,line) )
+		
 		{
 		//	cout <<line<<"\n";
 			vector<string> x = split(line, ";");
 			//display(x.begin(),x.end());
 			int id = atoi(x[0].c_str());
 			int hrs = atoi(x[3].c_str());
-			
+			vector<string> subs = split(x[2],",");
 			TeacherConst con;
 			for(int i=0;i<num_rec;i++)
 			{
@@ -131,14 +133,15 @@ Teacher *teacherInit()
 					break;
 				}
 			}
-			Teacher t(con, id, x[1], x[2], hrs);
+			Teacher t(con, id, x[1], subs, hrs);
+			t.display();
 			arr[idx++] = t;
 		}
 		myfile.close();
 	}
 	else cout << "Unable to open file"; 
 	return arr;
-}
+}	
 
 //CourseCode;CourseName;Credits;Semester
 Course *courseInit()

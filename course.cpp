@@ -11,6 +11,7 @@ Course::Course(CourseConst &con, string id, string name, int credits,int sem)
 {
 	++count;
 }
+
 int Course::getCount()
 {
 	return count;

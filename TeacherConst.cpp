@@ -9,6 +9,15 @@ TeacherConst::TeacherConst(int teacherid, string days_avail, string hrs_avail, i
 {
 }
 
+TeacherConst TeacherConst::operator=(TeacherConst& rhs)
+{
+	this->teacherid_=rhs.teacherid_;
+	this->days_avail_=rhs.days_avail_;
+	this->hrs_avail_=rhs.hrs_avail_;
+	this->continuous_=rhs.continuous_;
+	return *this;
+}
+
 TeacherConst::TeacherConst(TeacherConst& rhs)
 {
 	this->teacherid_=rhs.teacherid_;
