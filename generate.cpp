@@ -42,6 +42,7 @@ void alloc(struct field *x[6])
 		x[i]=new field[6];
 	}
 }
+
 int countTeachers(string courseid)
 {
 	int count=0;
@@ -223,7 +224,7 @@ bool teacher_available(Course *c,int day,int hour)
 	Teacher *tchrs=getTeachers(courseid);
 	int tchr_count = countTeachers(courseid);
 //	cout<<"**************************************************************"<<"\n";
-//	cout<<courseid<<":"<<tchr_count<<"\n";
+	cout<<courseid<<":"<<tchr_count<<"\n";
 	for(int i=0;i<tchr_count;++i)
 	{
 //		tchrs[i].display();

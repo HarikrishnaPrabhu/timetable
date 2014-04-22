@@ -4,7 +4,7 @@ TeacherConst::TeacherConst()
 {
 }
 
-TeacherConst::TeacherConst(int teacherid, string days_avail, string hrs_avail, int continuous)
+TeacherConst::TeacherConst(string teacherid, string days_avail, string hrs_avail, int continuous)
 :teacherid_(teacherid), days_avail_(days_avail), hrs_avail_(hrs_avail), continuous_(continuous)
 {
 }
@@ -34,7 +34,7 @@ void TeacherConst::display() const
 	cout << "Continuous Hours: " << continuous_ << endl;
 }
 
-int TeacherConst::getTeacherId() const
+string TeacherConst::getTeacherId() const
 {
 	return this->teacherid_;
 }

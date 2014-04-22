@@ -86,7 +86,7 @@ TeacherConst* TeacherConstInit()
 		{
 			vector<string> x = split(line, ";");
 			//display(x.begin(),x.end());
-			int id = atoi(x[0].c_str());
+			string id = x[0];
 			string d_avail = x[1];
 			string h_avail = x[2];
 			int conti= atoi(x[3].c_str());
@@ -121,13 +121,13 @@ Teacher *teacherInit()
 		//	cout <<line<<"\n";
 			vector<string> x = split(line, ";");
 			//display(x.begin(),x.end());
-			int id = atoi(x[0].c_str());
+			string id = x[0];
 			int hrs = atoi(x[3].c_str());
 			vector<string> subs = split(x[2],",");
 			TeacherConst con;
 			for(int i=0;i<num_rec;i++)
 			{
-				if(id==cont[i].getTeacherId())
+				if(x[0]==cont[i].getTeacherId())
 				{
 					con=cont[i];
 					break;

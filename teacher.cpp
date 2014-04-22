@@ -6,7 +6,7 @@ Teacher::Teacher()
 {
 }
 
-Teacher::Teacher(TeacherConst& con,int id, string name, vector<string> courseid, int hrs)
+Teacher::Teacher(TeacherConst& con,string id, string name, vector<string> courseid, int hrs)
 :con_(con),teacherid_(id), name_(name), courseid_(courseid), hrs_(hrs)
 {
 	++count;
@@ -39,6 +39,11 @@ string Teacher::getDaysAvail() const
 string Teacher::getHoursAvail() const
 {
 	return (this->con_).getHoursAvail();	
+}
+
+string Teacher::getTeacherId() const
+{
+	return this->teacherid_;
 }
 	
 template <typename ptr_t>
